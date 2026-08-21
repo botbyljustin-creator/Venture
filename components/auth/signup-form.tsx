@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { signUpAction, type ActionResult } from "@/lib/auth/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,6 +13,8 @@ const initialState: ActionResult = {};
 
 export function SignupForm() {
   const [state, formAction, pending] = useActionState(signUpAction, initialState);
+  const searchParams = useSearchParams();
+  const next = searchParams.get("next") || "/dashboard";
 
   return (
     <Card>
@@ -21,6 +24,7 @@ export function SignupForm() {
       </CardHeader>
       <CardContent>
         <form action={formAction} className="space-y-4">
+          <input type="hidden" name="next" value={next} />
           <div className="space-y-2">
             <Label htmlFor="fullName">Full name</Label>
             <Input id="fullName" name="fullName" autoComplete="name" required />

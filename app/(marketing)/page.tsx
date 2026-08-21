@@ -7,10 +7,12 @@ import { Industries } from "@/components/landing/industries";
 import { PricingSection } from "@/components/landing/pricing-section";
 import { Faq } from "@/components/landing/faq";
 import { FinalCta } from "@/components/landing/final-cta";
+import { TrackOnMount } from "@/components/analytics/track-on-mount";
 
 export default function HomePage() {
   return (
     <>
+      <TrackOnMount event="landing_page_view" />
       <Hero />
       <HowItWorks />
       <SampleResults />

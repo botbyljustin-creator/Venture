@@ -19,6 +19,7 @@ export interface Database {
         email: string;
         full_name: string | null;
         is_admin: boolean;
+        disabled: boolean;
         stripe_customer_id: string | null;
         created_at: string;
         updated_at: string;

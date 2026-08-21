@@ -4,7 +4,7 @@ import { buttonVariants } from "@/components/ui/button";
 
 const links = [
   { href: "/#how-it-works", label: "How It Works" },
-  { href: "/#industries", label: "Industries" },
+  { href: "/templates", label: "Templates" },
   { href: "/pricing", label: "Pricing" },
   { href: "/#faq", label: "FAQ" },
 ];

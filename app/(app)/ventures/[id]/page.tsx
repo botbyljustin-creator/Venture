@@ -8,7 +8,7 @@ import { appConfig } from "@/config/app";
 export default async function VentureOverviewPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const bundle = await getProjectBundle(id);
-  const { project, score, forecast, startupCosts } = bundle;
+  const { score, forecast, startupCosts } = bundle;
 
   const metrics = [
     { label: "Startup Capital", value: startupCosts ? formatCurrency(startupCosts.total, { compact: true }) : "—" },

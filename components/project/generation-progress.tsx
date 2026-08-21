@@ -8,6 +8,7 @@ import { GENERATION_STEPS, type GenerationStatus } from "@/lib/generation/steps"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { track } from "@/lib/analytics/track";
 
 export function GenerationProgress({ projectId }: { projectId: string }) {
   const router = useRouter();
@@ -18,6 +19,7 @@ export function GenerationProgress({ projectId }: { projectId: string }) {
   useEffect(() => {
     if (started.current) return;
     started.current = true;
+    track("analysis_started", { projectId });
 
     fetch(`/api/projects/${projectId}/generate`, { method: "POST" })
       .then(async (res) => {
@@ -43,6 +45,7 @@ export function GenerationProgress({ projectId }: { projectId: string }) {
       if (cancelled || !data) return;
 
       if (data.status === "ready") {
+        track("analysis_completed", { projectId });
         router.push(`/ventures/${projectId}`);
         return;
       }

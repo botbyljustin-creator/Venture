@@ -13,6 +13,11 @@ export async function getCurrentUser() {
 export async function requireUser() {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
+
+  const supabase = await createClient();
+  const { data: profile } = await supabase.from("profiles").select("disabled").eq("id", user.id).single();
+  if (profile?.disabled) redirect("/account-suspended");
+
   return user;
 }
 

@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { signupSchema, loginSchema, requestPasswordResetSchema, updatePasswordSchema } from "@/lib/validation/auth";
 import { appConfig } from "@/config/app";
+import { sendWelcomeEmail } from "@/lib/email/send";
 
 export interface ActionResult {
   error?: string;
@@ -32,7 +33,9 @@ export async function signUpAction(_prev: ActionResult, formData: FormData): Pro
   });
 
   if (error) return { error: error.message };
-  redirect("/dashboard");
+  await sendWelcomeEmail(parsed.data.email, parsed.data.fullName);
+  const next = formData.get("next");
+  redirect(typeof next === "string" && next.startsWith("/") ? next : "/dashboard");
 }
 
 export async function loginAction(_prev: ActionResult, formData: FormData): Promise<ActionResult> {

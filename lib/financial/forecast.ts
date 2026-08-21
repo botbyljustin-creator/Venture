@@ -74,8 +74,8 @@ export function calculateYearlyForecast(
   ];
 
   let prevRevenue = year1Revenue;
-  let prevGrossMarginPct = year1Revenue > 0 ? year1GrossProfit / year1Revenue : 0;
-  let prevOpExPct = year1Revenue > 0 ? year1OpEx / year1Revenue : 0;
+  const prevGrossMarginPct = year1Revenue > 0 ? year1GrossProfit / year1Revenue : 0;
+  const prevOpExPct = year1Revenue > 0 ? year1OpEx / year1Revenue : 0;
   let prevCustomers = year1Customers;
   let prevEmployees = a.employees;
 

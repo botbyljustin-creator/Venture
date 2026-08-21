@@ -66,7 +66,7 @@ export default async function FinancialsPage({ params }: { params: Promise<{ id:
         </TabsContent>
 
         <TabsContent value="whatif" className="mt-6">
-          <WhatIfCalculator baseAssumptions={assumptions} />
+          <WhatIfCalculator projectId={id} baseAssumptions={assumptions} />
         </TabsContent>
 
         <TabsContent value="goals" className="mt-6">

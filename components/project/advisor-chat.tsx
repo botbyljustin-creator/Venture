@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { track } from "@/lib/analytics/track";
 
 interface Message {
   role: "user" | "assistant";
@@ -36,6 +37,7 @@ export function AdvisorChat({ projectId, initialMessages }: { projectId: string;
     setMessages((prev) => [...prev, { role: "user", content: question }]);
     setInput("");
     setPending(true);
+    track("ai_question_asked", { projectId });
 
     try {
       const res = await fetch(`/api/projects/${projectId}/chat`, {

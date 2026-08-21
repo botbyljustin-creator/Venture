@@ -4,6 +4,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { Button, type ButtonProps } from "@/components/ui/button";
 import type { PlanId } from "@/config/pricing";
+import { track } from "@/lib/analytics/track";
 
 export function CheckoutButton({
   plan,
@@ -15,6 +16,7 @@ export function CheckoutButton({
 
   async function handleClick() {
     setLoading(true);
+    track("checkout_started", { plan, projectId });
     try {
       const res = await fetch("/api/stripe/checkout", {
         method: "POST",

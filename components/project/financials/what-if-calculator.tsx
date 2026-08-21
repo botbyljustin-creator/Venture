@@ -1,10 +1,14 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Slider } from "@/components/ui/slider";
+import { Button } from "@/components/ui/button";
 import { calculateMonthlyForecast, calculateYearlyForecast, calculateBreakEven } from "@/lib/financial";
 import { formatCurrency, formatPercent } from "@/lib/utils";
+import { saveAssumptionsAction } from "@/lib/projects/assumptions-actions";
 import type { FinancialAssumptions } from "@/types/venture";
 
 interface SliderField {
@@ -27,8 +31,12 @@ const FIELDS: SliderField[] = [
   { key: "closeRatePct", label: "Close Rate", min: 1, max: 100, step: 1, format: (v) => formatPercent(v, 0) },
 ];
 
-export function WhatIfCalculator({ baseAssumptions }: { baseAssumptions: FinancialAssumptions }) {
+export function WhatIfCalculator({ projectId, baseAssumptions }: { projectId: string; baseAssumptions: FinancialAssumptions }) {
   const [assumptions, setAssumptions] = useState<FinancialAssumptions>(baseAssumptions);
+  const [isPending, startTransition] = useTransition();
+  const router = useRouter();
+
+  const dirty = JSON.stringify(assumptions) !== JSON.stringify(baseAssumptions);
 
   const result = useMemo(() => {
     const monthly = calculateMonthlyForecast(assumptions);
@@ -41,11 +49,30 @@ export function WhatIfCalculator({ baseAssumptions }: { baseAssumptions: Financi
     setAssumptions((prev) => ({ ...prev, [key]: value }));
   }
 
+  function save() {
+    startTransition(async () => {
+      const result = await saveAssumptionsAction(projectId, assumptions);
+      if (result.error) {
+        toast.error(result.error);
+        return;
+      }
+      toast.success("Financial model updated");
+      router.refresh();
+    });
+  }
+
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>What-If Calculator</CardTitle>
-        <CardDescription>Drag any input to see the impact instantly — recalculated in your browser.</CardDescription>
+      <CardHeader className="flex flex-row items-start justify-between gap-4">
+        <div>
+          <CardTitle>What-If Calculator</CardTitle>
+          <CardDescription>Drag any input to see the impact instantly — recalculated in your browser.</CardDescription>
+        </div>
+        {dirty && (
+          <Button onClick={save} disabled={isPending}>
+            {isPending ? "Saving…" : "Save These Changes"}
+          </Button>
+        )}
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">

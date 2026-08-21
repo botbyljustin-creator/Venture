@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { requireUser } from "@/lib/auth/session";
 import { canCreateNewVenture } from "@/lib/permissions/entitlements";
 import { wizardStepSchemas, defaultPreferences } from "@/lib/validation/wizard";
+import { getTemplate } from "@/config/templates";
 import type { Json } from "@/types/database";
 
 export async function createDraftProjectAction(templateSlug?: string) {
@@ -15,10 +16,17 @@ export async function createDraftProjectAction(templateSlug?: string) {
     redirect(`/pricing?blocked=${encodeURIComponent(reason || "upgrade_required")}`);
   }
 
+  const template = templateSlug ? getTemplate(templateSlug) : undefined;
+
   const supabase = await createClient();
   const { data: project, error } = await supabase
     .from("projects")
-    .insert({ user_id: user.id, name: "Untitled Venture", template_slug: templateSlug ?? null, status: "draft" })
+    .insert({
+      user_id: user.id,
+      name: template ? `${template.name} Business` : "Untitled Venture",
+      template_slug: templateSlug ?? null,
+      status: "draft",
+    })
     .select("id")
     .single();
 
@@ -28,7 +36,10 @@ export async function createDraftProjectAction(templateSlug?: string) {
 
   await supabase.from("project_inputs").insert({
     project_id: project.id,
+    business_idea: template ? `I want to start a ${template.name.toLowerCase()} business.` : null,
+    business_model: template ? ({ industry: template.industry, businessType: template.businessType } as unknown as Json) : {},
     preferences: defaultPreferences as unknown as Json,
+    wizard_step: template ? 2 : 1,
   });
 
   redirect(`/ventures/${project.id}/wizard`);

@@ -1,5 +1,6 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { logAiUsage } from "@/lib/ai/usage";
+import { sendAnalysisCompleteEmail } from "@/lib/email/send";
 import {
   generateClassification,
   generateStartupCostItems,
@@ -130,7 +131,8 @@ export async function runGenerationPipeline(projectId: string, userId: string): 
     const assumptionsResult = await generateFinancialAssumptions(inputs, classification);
     await logUsage("financial_assumptions", assumptionsResult);
 
-    const { reasoning: _reasoning, ...assumptionValues } = assumptionsResult.data;
+    const { reasoning, ...assumptionValues } = assumptionsResult.data;
+    void reasoning; // narrative only — not part of the deterministic assumptions object
     const assumptions: FinancialAssumptions = {
       ...assumptionValues,
       totalStartupCost: startupSummary.totalStartupInvestment,
@@ -282,6 +284,11 @@ Unit economics: avg price $${unitEconomics.averagePrice}, gross margin ${unitEco
         breakeven_month: breakEven.estimatedMonthsUntilBreakEven,
       })
       .eq("id", projectId);
+
+    const { data: profile } = await admin.from("profiles").select("email").eq("id", userId).single();
+    if (profile?.email) {
+      await sendAnalysisCompleteEmail(profile.email, classification.refinedBusinessName, projectId, score.overall);
+    }
   } catch (err) {
     const message = err instanceof Error ? err.message : "Generation failed unexpectedly";
     await fail(message);
